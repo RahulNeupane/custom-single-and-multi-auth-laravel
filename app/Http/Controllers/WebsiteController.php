@@ -43,7 +43,16 @@ class WebsiteController extends Controller
         echo 'verify the email to continue';
     }
 
-    public function registration_verify(){
+    public function registration_verify($token,$email){
+        $user = User::where('token', $token)->where('email', $email)->first();
+
+        if(!$user){
+            return redirect()->route('login');
+        }
+        $user->status = 'verified';
+        $user->token = '';
+        $user->update();
+        echo 'Registered succesfully ! <br> <a href="{{route("login")}}">Goto Login</a> ';
         
     }
     public function forgetPassword(){
