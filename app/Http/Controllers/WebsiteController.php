@@ -44,6 +44,11 @@ class WebsiteController extends Controller
     public function registration_submit(Request $request){
         $token = hash('sha256', time());
        
+        if ($request->password != $request->retype_password)
+        {
+            dd('password not matched');
+        }
+
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
@@ -93,5 +98,27 @@ class WebsiteController extends Controller
         Mail::to($request->email)->send(new Websitemail($subject, $message));
 
         echo 'kindly check your email for reset link';
+    }
+
+    public function resetPassword($token,$email){
+        $user = User::where('email', $email)->where('token', $token)->first();
+        if(!$user) return redirect()->route('login');
+
+        return view('reset_password',compact('token','email'));
+
+    }
+
+    public function resetPasswordSubmit(Request $request){
+        $user = User::where('email', $request->email)->where('token', $request->token)->first();
+        if (!$user)
+            return redirect()->route('login');
+        if ($request->new_password != $request->retype_password)
+            echo 'password not matched';
+        else {
+            $user->token = '';
+            $user->password = Hash::make($request->new_password);
+            $user->update();
+            echo 'password changed succesfully! <br> <a href="{{route("login")}}">Goto Login</a>  ';
+        }
     }
 }
