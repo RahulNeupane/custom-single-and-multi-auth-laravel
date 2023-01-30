@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\Websitemail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -19,6 +20,24 @@ class WebsiteController extends Controller
     public function login(){
         return view('login');
     }
+    public function login_submit(Request $request){
+        $credentials = [
+            'email' => $request->email,
+            'password' => $request->password,
+            'status' => 'verified'
+        ];
+
+        if(Auth::attempt($credentials)){
+            return redirect()->route('dashboard');
+        } else
+            return redirect()->route('login');
+    }
+
+    public function logout(){
+        Auth::logout();
+        return redirect()->route('login');
+    }
+
     public function registration(){
         return view('registration');
     }
