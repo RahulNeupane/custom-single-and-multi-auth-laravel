@@ -11,51 +11,47 @@ use Illuminate\Support\Facades\Mail;
 
 class WebsiteController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('home');
     }
-    public function dashboard_user(){
-        return view('dashboard_user');
+    public function dashboard()
+    {
+        return view('dashboard');
     }
-    public function dashboard_admin(){
-        return view('dashboard_admin');
-    }
-    public function settings(){
-        return view('settings');
-    }
-    public function login(){
+    public function login()
+    {
         return view('login');
     }
-    public function login_submit(Request $request){
+    public function login_submit(Request $request)
+    {
         $credentials = [
             'email' => $request->email,
             'password' => $request->password,
             'status' => 'verified'
         ];
 
-        if(Auth::attempt($credentials)){
-            if(auth()->user()->role == 1){
-                return redirect()->route('dashboard_admin');
-            }else{
-                return redirect()->route('dashboard_user');
-            }
+        if (Auth::attempt($credentials)) {
+            return redirect()->route('dashboard');
         } else
             return redirect()->route('login');
     }
 
-    public function logout(){
-        Auth::logout();
-        return redirect()->route('login');
+    public function logout()
+    {
+        Auth::guard('admin')->logout();
+        return redirect()->route('admin_login');
     }
 
-    public function registration(){
+    public function registration()
+    {
         return view('registration');
     }
-    public function registration_submit(Request $request){
+    public function registration_submit(Request $request)
+    {
         $token = hash('sha256', time());
-       
-        if ($request->password != $request->retype_password)
-        {
+
+        if ($request->password != $request->retype_password) {
             dd('password not matched');
         }
 
@@ -70,38 +66,40 @@ class WebsiteController extends Controller
 
         $verification_link = url('registration/verify/' . $token . '/' . $request->email);
         $subject = 'Registration Confirmation';
-        $message = 'Please click on this link to verify: <br><a href="'.$verification_link.'">Click here</a> ';
-        
+        $message = 'Please click on this link to verify: <br><a href="' . $verification_link . '">Click here</a> ';
+
 
         Mail::to($request->email)->send(new Websitemail($subject, $message));
         echo 'verify the email to continue';
     }
 
-    public function registration_verify($token,$email){
+    public function registration_verify($token, $email)
+    {
         $user = User::where('token', $token)->where('email', $email)->first();
 
-        if(!$user){
+        if (!$user) {
             return redirect()->route('login');
         }
         $user->status = 'verified';
         $user->token = '';
         $user->update();
         echo 'Registered succesfully ! <br> <a href="{{route("login")}}">Goto Login</a> ';
-        
     }
-    public function forgetPassword(){
+    public function forgetPassword()
+    {
         return view('forget_password');
     }
 
-    public function forgetPassword_submit(Request $request){
-        $token = hash('sha256',time());
+    public function forgetPassword_submit(Request $request)
+    {
+        $token = hash('sha256', time());
         $user = User::where('email', $request->email)->first();
         if (!$user)
             dd('email not found');
 
         $user->token = $token;
         $user->update();
-        
+
         $reset_link = url('reset-password/' . $token . '/' . $request->email);
         $subject = 'Reset Password';
         $message = 'Click on the link to reset password : <br> <a href="' . $reset_link . '">Click here</a>';
@@ -110,15 +108,16 @@ class WebsiteController extends Controller
         echo 'kindly check your email for reset link';
     }
 
-    public function resetPassword($token,$email){
+    public function resetPassword($token, $email)
+    {
         $user = User::where('email', $email)->where('token', $token)->first();
-        if(!$user) return redirect()->route('login');
+        if (!$user) return redirect()->route('login');
 
-        return view('reset_password',compact('token','email'));
-
+        return view('reset_password', compact('token', 'email'));
     }
 
-    public function resetPasswordSubmit(Request $request){
+    public function resetPasswordSubmit(Request $request)
+    {
         $user = User::where('email', $request->email)->where('token', $request->token)->first();
         if (!$user)
             return redirect()->route('login');

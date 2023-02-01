@@ -1,16 +1,12 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WebsiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WebsiteController::class, 'index'])->name('home');
 
-Route::get('/dashboard-admin', [WebsiteController::class, 'dashboard_admin'])->name('dashboard_admin')->middleware(['auth','admin']);
-
-Route::get('/dashboard-user', [WebsiteController::class, 'dashboard_user'])->name('dashboard_user')->middleware('auth');
-
-Route::get('/settings', [WebsiteController::class, 'settings'])->name('settings')->middleware(['auth','admin']);
-
+Route::get('/dashboard', [WebsiteController::class, 'dashboard'])->name('dashboard')->middleware('auth');
 Route::get('/login', [WebsiteController::class, 'login'])->name('login');
 Route::post('/login_submit', [WebsiteController::class, 'login_submit'])->name('login_submit');
 
@@ -25,3 +21,12 @@ Route::get('/forgetPassword', [WebsiteController::class, 'forgetPassword'])->nam
 Route::post('/forgetPassword_submit', [WebsiteController::class, 'forgetPassword_submit'])->name('forgetPassword_submit');
 Route::get('reset-password/{token}/{email}',[WebsiteController::class,'resetPassword']);
 Route::post('reset-password-submit',[WebsiteController::class,'resetPasswordSubmit'])->name('resetPasswordSubmit');
+
+
+// admin 
+Route::get('/admin/login', [AdminController::class, 'login'])->name('admin_login');
+Route::post('/admin/login_submit', [AdminController::class, 'admin_login_submit'])->name('admin_login_submit');
+
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin_dashboard')->middleware(['admin:admin']);
+Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin_settings')->middleware(['admin:admin']);
+Route::get('/admin/logout', [WebsiteController::class, 'logout'])->name('admin_logout');
