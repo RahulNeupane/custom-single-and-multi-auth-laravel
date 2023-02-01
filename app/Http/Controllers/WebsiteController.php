@@ -14,8 +14,14 @@ class WebsiteController extends Controller
     public function index(){
         return view('home');
     }
-    public function dashboard(){
-        return view('dashboard');
+    public function dashboard_user(){
+        return view('dashboard_user');
+    }
+    public function dashboard_admin(){
+        return view('dashboard_admin');
+    }
+    public function settings(){
+        return view('settings');
     }
     public function login(){
         return view('login');
@@ -28,7 +34,11 @@ class WebsiteController extends Controller
         ];
 
         if(Auth::attempt($credentials)){
-            return redirect()->route('dashboard');
+            if(auth()->user()->role == 1){
+                return redirect()->route('dashboard_admin');
+            }else{
+                return redirect()->route('dashboard_user');
+            }
         } else
             return redirect()->route('login');
     }
@@ -118,7 +128,7 @@ class WebsiteController extends Controller
             $user->token = '';
             $user->password = Hash::make($request->new_password);
             $user->update();
-            echo 'password changed succesfully! <br> <a href="{{route("login")}}">Goto Login</a>  ';
+            echo 'Password changed succesfully ! <br> <a href="{{route("login")}}">Goto Login</a> ';
         }
     }
 }
